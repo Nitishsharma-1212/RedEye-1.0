@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redeye Info - Cyber Reconnaissance</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        /* Inline styles for specific logic-dependent elements if needed, 
+           but mostly moved to style.css or kept minimal */
+        .data-list {
+            list-style: none;
+            width: 100%;
+        }
+
+        .data-list li {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(255, 0, 60, 0.1);
+        }
+
+        .data-list .label {
+            color: var(--text-secondary);
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+        }
+
+        .data-list .value {
+            color: var(--text-primary);
+            text-align: right;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+        }
+
+        .check-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 6px;
+        }
+
+        .check-icon {
+            width: 10px;
+            height: 10px;
+            border-radius: 0;
+            /* Square for hacker look */
+            transform: rotate(45deg);
+            /* Diamond shape */
+        }
+
+        .check-pass {
+            background: var(--success);
+            box-shadow: 0 0 5px var(--success);
+        }
+
+        .check-fail {
+            background: var(--error);
+            box-shadow: 0 0 5px var(--error);
+        }
+
+        .dns-group {
+            margin-bottom: 1.2rem;
+            border-left: 2px solid var(--accent);
+            padding-left: 0.8rem;
+        }
+
+        .dns-type {
+            color: var(--accent);
+            font-family: var(--font-heading);
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-bottom: 0.4rem;
+            letter-spacing: 0.05em;
+        }
+
+        .screenshot-img {
+            width: 100%;
+            border: 1px solid var(--accent);
+            border-radius: 4px;
+            opacity: 0.9;
+            filter: contrast(1.1) brightness(0.9);
+            box-shadow: 0 0 15px rgba(255, 0, 60, 0.2);
+        }
+
+        .info-row {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 0.8rem;
+        }
+
+        .info-row .label {
+            color: var(--accent);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+            font-family: var(--font-heading);
+            letter-spacing: 0.1em;
+            opacity: 0.8;
+        }
+
+        .info-row .value {
+            word-break: break-all;
+            font-family: var(--font-mono);
+            background: rgba(0, 0, 0, 0.3);
+            padding: 4px 8px;
+            border-radius: 2px;
+            border-left: 1px solid rgba(255, 0, 60, 0.3);
+        }
+
+        .grid {
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        }
+
+        @media (min-width: 1200px) {
+            .grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Floating Particles Container -->
+    <div class="particles" id="particles"></div>
+
+    <div class="container">
+        <header>
+            <a href="/" class="logo">
+                <!-- Red Glowing Eye Icon -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M12 9v-3" stroke-width="1" class="glitch-line"></path>
+                </svg>
+                <span class="glitch-text" data-text="REDEYE INFO">REDEYE INFO</span>
+            </a>
+
+            <!-- Navigation -->
+            <nav class="main-nav">
+                <a href="#" class="nav-item">SCAN</a>
+                <a href="#" class="nav-item">TOOLS</a>
+                <a href="#" class="nav-item">OSINT</a>
+                <a href="#" class="nav-item">REPORTS</a>
+                <a href="#" class="nav-item">ABOUT</a>
+            </nav>
+
+            <div class="header-controls">
+                <div id="headerStats" style="display: none;">
+                    <span class="stat-item"><span id="passCount" class="stat-val pass">0</span> SUCCESS</span>
+                    <span class="stat-item"><span id="failCount" class="stat-val fail">0</span> FAIL</span>
+                </div>
+            </div>
+        </header>
+
+        <section id="landing" class="hero">
+            <h2 class="glitch-text" data-text="SYSTEM TARGETING">SYSTEM TARGETING</h2>
+            <p class="hero-sub">ENTER URL / DOMAIN / IP TO ANALYZE</p>
+
+            <div class="search-container">
+                <div class="search-input-wrapper">
+                    <div class="input-prefix">></div>
+                    <input type="text" id="urlInput" placeholder="target_system.com" autofocus autocomplete="off">
+                    <div class="input-cursor"></div>
+                </div>
+                <button id="analyzeBtn" class="analyze-btn">
+                    <span class="btn-text">INITIATE SCAN</span>
+                    <span class="btn-glare"></span>
+                </button>
+            </div>
+        </section>
+
+        <section id="results">
+            <div class="results-header">
+                <div class="progress-container">
+                    <div id="progressText">INITIALIZING SEQUENCE...</div>
+                    <div class="progress-bar">
+                        <div id="progressFill" class="progress-fill"></div>
+                    </div>
+                </div>
+                <div id="currentUrl">TARGETING...</div>
+            </div>
+
+            <div id="cardsGrid" class="grid"></div>
+
+            <div id="actionContainer" style="text-align: center; margin-top: 4rem; display: none;">
+                <button id="nextSearchBtn" class="analyze-btn">NEXT TARGET</button>
+            </div>
+        </section>
+
+        <footer>
+            <div class="footer-links">
+                <a href="#">Redeye Info</a>
+                <a href="#">Documentation</a>
+                <a href="#">API</a>
+                <a href="#">Privacy</a>
+            </div>
+            <p class="copyright">© 2026 REDEYE SECURITY OPERATIONS. ALL RIGHTS RESERVED.</p>
+            <p class="console-text">ESTABLISHED CONNECTION: SECURE</p>
+        </footer>
+    </div>
+
+    <script>
+        // Simple logger wrapper
+        const log = console.log;
+
+        const landing = document.getElementById('landing');
+        const results = document.getElementById('results');
+        const urlInput = document.getElementById('urlInput');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const cardsGrid = document.getElementById('cardsGrid');
+        const progressFill = document.getElementById('progressFill');
+        const progressText = document.getElementById('progressText');
+        const currentUrlDisplay = document.getElementById('currentUrl');
+        const headerStats = document.getElementById('headerStats');
+        const passCount = document.getElementById('passCount');
+        const failCount = document.getElementById('failCount');
+
+        // Particle System
+        function createParticles() {
+            const container = document.getElementById('particles');
+            const particleCount = 50;
+
+            for (let i = 0; i < particleCount; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.left = Math.random() * 100 + 'vw';
+                p.style.top = Math.random() * 100 + 'vh';
+                p.style.animationDuration = (Math.random() * 10 + 5) + 's';
+                p.style.opacity = Math.random() * 0.5;
+                container.appendChild(p);
+            }
+        }
+        createParticles();
+
+        const endpoints = [
+            { id: 'dns', name: 'DNS RECORDS' },
+            { id: 'whois', name: 'WHOIS DATA' },
+            { id: 'ssl', name: 'SSL/TLS CERT' },
+            { id: 'headers', name: 'HTTP HEADERS' },
+            { id: 'http-security', name: 'SECURITY FLAGS' },
+            { id: 'firewall', name: 'FIREWALL DETECT' },
+            { id: 'cookies', name: 'COOKIES' },
+            { id: 'status', name: 'SERVER STATUS' },
+            { id: 'robots-txt', name: 'ROBOTS.TXT' },
+            { id: 'security-txt', name: 'SECURITY.TXT' },
+            { id: 'sitemap', name: 'SITE MAP' },
+            { id: 'social-tags', name: 'SOCIAL INTEL' },
+            { id: 'dns-server', name: 'DNS SERVER' },
+            { id: 'dnssec', name: 'DNSSEC' },
+            { id: 'hsts', name: 'HSTS STATUS' },
+            { id: 'redirects', name: 'REDIRECT CHAIN' },
+            { id: 'block-lists', name: 'BLOCK LISTS' },
+            { id: 'rank', name: 'GLOBAL RANK' },
+            { id: 'tls', name: 'TLS HANDSHAKE' },
+            { id: 'txt-records', name: 'TXT DATA' },
+            { id: 'mail-config', name: 'MAIL INFRAS' },
+            { id: 'linked-pages', name: 'LINKED NODES' },
+            { id: 'ports', name: 'OPEN PORTS' },
+            { id: 'archives', name: 'ARCHIVES' },
+            { id: 'threats', name: 'THREAT INTEL' },
+            { id: 'screenshot', name: 'VISUAL RECON' }
+        ];
+
+        let completedJobs = 0;
+        let successfulJobs = 0;
+        let failedJobs = 0;
+
+        function createCard(endpoint, index) {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.id = `card-${endpoint.id}`;
+            card.style.animationDelay = `${index * 0.05}s`;
+            card.innerHTML = `
+                <div class="card-header">
+                    <span class="card-title">${endpoint.name}</span>
+                    <div class="status-indicator status-loading"></div>
+                </div>
+                <div class="card-content">
+                    <div class="loading-text">AWAITING DATA...</div>
+                </div>
+                <div class="card-footer">
+                    <span class="status-text">SCANNING</span>
+                </div>
+            `;
+            return card;
+        }
+
+        async function fetchEndpoint(endpoint, url) {
+            const card = document.getElementById(`card-${endpoint.id}`);
+            if (!card) return;
+
+            const content = card.querySelector('.card-content');
+            const indicator = card.querySelector('.status-indicator');
+            const footerText = card.querySelector('.status-text');
+
+            try {
+                const response = await fetch(`/api/${endpoint.id}?url=${encodeURIComponent(url)}`);
+                const data = await response.json();
+
+                if (data.error) throw new Error(data.error);
+
+                indicator.className = 'status-indicator status-success';
+                card.classList.add('finished-success');
+                footerText.innerText = 'SECURE';
+                footerText.style.color = 'var(--success)';
+                successfulJobs++;
+                renderData(endpoint.id, content, data);
+            } catch (error) {
+                console.error(error);
+                indicator.className = 'status-indicator status-error';
+                card.classList.add('finished-error');
+                footerText.innerText = 'ERROR';
+                footerText.style.color = 'var(--error)';
+                failedJobs++;
+                content.innerHTML = `<div style="color: var(--error); font-family: var(--font-mono); font-size: 0.8rem;">[!] ${error.message || 'CONNECTION FAILED'}</div>`;
+            } finally {
+                completedJobs++;
+                updateProgress();
+                checkCompletion();
+            }
+        }
+
+        function updateProgress() {
+            const percent = (completedJobs / endpoints.length) * 100;
+            progressFill.style.width = `${percent}%`;
+            progressText.innerText = `SEQUENCE PROGRESS: ${completedJobs} / ${endpoints.length} MODULES`;
+            passCount.innerText = successfulJobs;
+            failCount.innerText = failedJobs;
+        }
+
+        function renderData(id, container, data) {
+            if (data.skipped) {
+                container.innerHTML = `<div style="color: var(--text-secondary); font-style: italic;">[!] SKIPPED: ${data.skipped}</div>`;
+                return;
+            }
+
+            switch (id) {
+                case 'screenshot':
+                    container.innerHTML = `<img src="data:image/png;base64,${data.image}" class="screenshot-img">`;
+                    break;
+                case 'dns':
+                    let dnsHtml = '';
+                    for (const [type, records] of Object.entries(data)) {
+                        if (Array.isArray(records) && records.length > 0) {
+                            dnsHtml += `<div class="dns-group"><div class="dns-type">${type}</div>`;
+                            records.forEach(r => {
+                                const val = typeof r === 'string' ? r : (r.address || r.exchange || JSON.stringify(r));
+                                dnsHtml += `<div style="font-family: var(--font-mono); font-size: 0.8rem; margin-bottom: 2px;">${val}</div>`;
+                            });
+                            dnsHtml += `</div>`;
+                        }
+                    }
+                    container.innerHTML = dnsHtml || 'NO RECORDS IDENTIFIED';
+                    break;
+                case 'block-lists':
+                    let blockHtml = '<ul class="data-list">';
+                    (data.blocklists || []).forEach(item => {
+                        blockHtml += `<li><span class="check-item"><div class="check-icon ${item.isBlocked ? 'check-fail' : 'check-pass'}"></div>${item.server}</span><span class="value">${item.isBlocked ? 'BLOCKED' : 'CLEAN'}</span></li>`;
+                    });
+                    container.innerHTML = blockHtml + '</ul>';
+                    break;
+                case 'http-security':
+                case 'firewall':
+                case 'hsts':
+                    let checkHtml = '<ul class="data-list">';
+                    for (const [key, val] of Object.entries(data)) {
+                        const isPass = val === true || (typeof val === 'string' && val !== 'No' && !val.includes('false'));
+                        checkHtml += `<li><span class="check-item"><div class="check-icon ${isPass ? 'check-pass' : 'check-fail'}"></div>${key}</span><span class="value">${val}</span></li>`;
+                    }
+                    container.innerHTML = checkHtml + '</ul>';
+                    break;
+                case 'dns-server':
+                    let dsHtml = '';
+                    (data.dns || []).forEach((s, i) => {
+                        dsHtml += `<div class="dns-group"><div class="dns-type">SERVER_NODE_0${i + 1}</div>
+                            <div class="info-row"><span class="label">IP ADDRESS</span><span class="value">${s.address}</span></div>
+                            <div class="info-row"><span class="label">HOSTNAME</span><span class="value">${s.hostname || 'N/A'}</span></div>
+                            <div class="info-row"><span class="label">DoH SUPPORT</span><span class="value">${s.dohDirectSupports ? 'ACTIVE' : 'INACTIVE'}</span></div>
+                        </div>`;
+                    });
+                    container.innerHTML = dsHtml;
+                    break;
+                default:
+                    let html = '';
+                    for (const [key, value] of Object.entries(data)) {
+                        if (key === 'statusCode' || key === 'body') continue;
+                        const displayVal = typeof value === 'object' ? `<pre style="font-size: 0.7rem; margin-top: 4px; color: var(--text-secondary);">${JSON.stringify(value, null, 2)}</pre>` : value;
+                        html += `<div class="info-row"><span class="label">${key.replace(/_/g, ' ')}</span><span class="value">${displayVal}</span></div>`;
+                    }
+                    container.innerHTML = html || '<div style="color: var(--text-secondary)">NO DATA RETRIEVED</div>';
+            }
+        }
+
+        async function startAnalysis() {
+            try {
+                let url = urlInput.value.trim();
+                if (!url) { return; }
+                if (!url.startsWith('http')) url = 'https://' + url;
+
+                const hostname = new URL(url).hostname;
+                currentUrlDisplay.innerText = `TARGET: ${hostname.toUpperCase()}`;
+
+                // UI Transitions
+                landing.classList.add('slide-out');
+                setTimeout(() => {
+                    landing.style.display = 'none';
+                    results.style.display = 'block';
+                    headerStats.style.display = 'flex';
+                    // Trigger reflow for animation
+                    void results.offsetWidth;
+                    results.classList.add('fade-in');
+                }, 500);
+
+                actionContainer.style.display = 'none';
+
+                // Reset
+                cardsGrid.innerHTML = '';
+                completedJobs = 0; successfulJobs = 0; failedJobs = 0;
+                passCount.innerText = '0';
+                failCount.innerText = '0';
+                progressFill.style.width = '0%';
+                progressText.innerText = `INITIALIZING...`;
+
+                // Create cards
+                endpoints.forEach((endpoint, index) => {
+                    cardsGrid.appendChild(createCard(endpoint, index));
+                });
+
+                // Start fetch
+                setTimeout(() => {
+                    endpoints.forEach(endpoint => fetchEndpoint(endpoint, url));
+                }, 800);
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        analyzeBtn.addEventListener('click', startAnalysis);
+        urlInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') startAnalysis(); });
+
+        const nextSearchBtn = document.getElementById('nextSearchBtn');
+        const actionContainer = document.getElementById('actionContainer');
+
+        nextSearchBtn.addEventListener('click', () => {
+            results.style.display = 'none';
+            landing.style.display = 'flex';
+            landing.classList.remove('slide-out');
+            headerStats.style.display = 'none';
+            cardsGrid.innerHTML = '';
+            actionContainer.style.display = 'none';
+            urlInput.value = '';
+            urlInput.focus();
+        });
+
+        function checkCompletion() {
+            if (completedJobs === endpoints.length) {
+                actionContainer.style.display = 'block';
+                actionContainer.scrollIntoView({ behavior: 'smooth' });
+                progressText.innerText = "SCAN SEQUENCE COMPLETE";
+            }
+        }
+    </script>
+</body>
+
+</html>
