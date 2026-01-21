@@ -49,7 +49,7 @@ Do not use against systems you do not own or have permission to test.
 The author is not responsible for misuse.
 ## 👤 Author
 
-Sid  
+itsme
 GitHub: https://github.com/Nitishsharma-1212 
 
 Linkdin: https://www.linkedin.com/in/nitishsharma1212/
